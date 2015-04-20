@@ -1,0 +1,77 @@
+\documentclass{article}
+\begin{document}
+\section*{Are there more JavaScript or Python repositories in GitHub ?}
+\subsection*{Introduction}
+\par GitHub has many repositories on JavaScript and Pyhton. The repositories are pojects or group of files which we can upload on the GitHub. These can be the digital directories or storage space where your projects are saved. Now these repositories can be accessed by anyone if uploaded publicly or just by the owner if uploaded privately. This paper will show us that which programming language repositories are more in GitHub.
+\smallskip
+\par \textbf{JavaScript} is a dynamic programming language used for creating parts of web browsers. This language allows client side script to interact with user. It controls the documents which is displayed ans communicates asynchronously. JavaScript is a multi-paradigm language which has prototype-based scripting language with dynamic typing and first class functions.
+\smallskip
+\par \textbf{Python} is a high level programming language. This language allows users to code less to express the same concepts which  c++ or java will take more because of the design philosophy which improves code readability. Object-oriented, imperative and functional programming or procedural styles are the various programming paradigm supported by Python.
+\subsection*{Data}
+\par Data is obtained from the GitHub repos link. There is the GitHub api available for both JavaScript and Python. The data which will be extracted from the the api will be only of January 2015. Url, path are defined separatly. searchJ is for javascript and searchP variable is for python. We need only page one which contains total of 100 results.
+<<osemn1, tidy=TRUE>>=
+library(jsonlite)
+library(plyr)
+library(ggplot2)
+library(scales)
+url  <- 'https://api.github.com/'   
+path <- 'search/repositories'         
+search1 <- '?q=created%3A%222015-01-01+..+2015-01-31%22'    
+searchJ <- '+language:javascript'                     
+searchP <- '+language:python'                         
+pageNo <- '&page=1'                                 
+pageSize <- '&per_page=1'                             
+@
+
+Now all the variable are combined to form one whole URL for JavaScript and Python. URLjavascript for JavaScript API and URLpython for Python API. 
+<<osemn2, tidy=TRUE>>=
+# Paste0 allows us to concatenate all of the above into one long URL
+URLjavascript <-paste0(url, path, search1, searchJ, pageNo, pageSize)
+
+# Here is the Python version 
+URLpython <-paste0(url, path, search1, searchP, pageNo, pageSize)
+@
+
+<<osemn3, tidy=TRUE>>=
+j = jsonlite::fromJSON(URLjavascript)
+repos.javascript <-j$total_count
+repos.javascript
+
+p = jsonlite::fromJSON(URLpython)
+repos.python <-p$total_count
+repos.python
+@
+
+
+Dataframe is created which will have two columns. We use data.frame to bind the 2 columns and saves it to df.
+<<osemn4>>=
+
+Languages <-c("Javascript", "Python")
+Repositories <-c(repos.javascript, repos.python)
+
+df = data.frame(Languages, Repositories)
+@
+
+Class, Structure and summary is as follows
+<<osemn3.1>>=
+class(df)
+
+str(df)
+
+summary(df)
+@
+
+\subsection*{Bar Graph}
+<<osemn5>>=
+
+g=ggplot(data=df, aes(x=Languages, y=Repositories, fill=Languages)) 
+g+ geom_bar(stat="identity")
+
+@
+\subsection*{Line Graph}
+<<osemn6, tidy=TRUE>>=
+l <- ggplot(data=df, aes(x=Languages, y=Repositories, group=1)) + geom_line(colour="red", linetype="dashed", size=1.5) + geom_point(colour="red", size=4, shape=21, fill="white")
+ print(l + scale_y_continuous(labels = comma))
+@
+
+\end{document}
